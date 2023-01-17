@@ -2,38 +2,41 @@ import React, { Component } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { connect } from 'react-redux';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
-import { emitter } from '../../utils/emitter'
+import _ from 'lodash'
 
-class ModalAddUser extends Component {
+class ModalEditUser extends Component {
     //Khai báo constructor có thằng props - thằng này có data từ th cha (UserManage.js)
     //tao state luon de luu data
     constructor(props) {
         super(props);
         this.state = {
+            id: "",
             email: "",
             password: "",
             firstName: "",
             lastName: "",
             address: ""
         }
-
-        this.listenToEmitter();
-    }
-
-    listenToEmitter() {
-        emitter.on('EVENT_CLEAR_INPUT_PARAMETER_MODAL_ADD_NEW_USER', () => {
-            this.setState({
-                email: "",
-                password: "",
-                firstName: "",
-                lastName: "",
-                address: ""  
-            })
-        })
     }
 
     componentDidMount() {
     }
+
+    componentDidUpdate(prevProps, prevState) { 
+        //check userDataWillBeEdit có trong props hiện tại và userDataWillBeEdit ở props hiện tại khác userDataWillBeEdit trong props quá khứ:
+        if ('userDataWillBeEdit' in this.props && this.props.userDataWillBeEdit !== prevProps.userDataWillBeEdit) {
+            const currentDataUser = this.props.userDataWillBeEdit;
+            this.setState({
+                    id: currentDataUser.id,
+                    email: currentDataUser.email,
+                    password: '******',
+                    firstName: currentDataUser.firstName,
+                    lastName: currentDataUser.lastName,
+                    address: currentDataUser.address
+            });
+        }
+    }
+
     //OFF modal bằng việc gọi tới function bên thằng cha truyền tới cho
     //Nên ở đây chỉ việc render thôi, k xử lý event gì cả
     toggle = () => {
@@ -69,15 +72,12 @@ class ModalAddUser extends Component {
         return isValidate
     }
 
-
-
-    handleAddNewUser = () => {
+    handleEditNewUser = () => {
         let checkValidate = this.validateInputData()
         if (checkValidate === true) {
-            this.props.addNewUserFromParent(this.state)
+            this.props.editUserFromParent(this.state)
         }
     }
-
 
     render() {
         return (
@@ -87,7 +87,7 @@ class ModalAddUser extends Component {
                 className={"modal-add-user"}
                 size={"lg"}
             >
-                <ModalHeader>Add new user</ModalHeader>
+                <ModalHeader>Edit user</ModalHeader>
                 <ModalBody>
                     <div className="body-addUser">
                         <div className="container-input">
@@ -96,6 +96,7 @@ class ModalAddUser extends Component {
                                 type="email"
                                 onChange={(event) => this.handleOnChangeInput(event, "email")}
                                 value={this.state.email}
+                                disabled
                             />
                         </div>
                         <div className="container-input">
@@ -104,6 +105,7 @@ class ModalAddUser extends Component {
                                 type="text"
                                 onChange={(event) => this.handleOnChangeInput(event, "password")}
                                 value={this.state.password}
+                                disabled
                             />
                         </div>
                     </div>
@@ -140,8 +142,8 @@ class ModalAddUser extends Component {
                     <Button
                         color="primary"
                         className="px-3"
-                        onClick={() => this.handleAddNewUser()}>
-                        Add
+                        onClick={() => this.handleEditNewUser()}>
+                        Save
                     </Button>{' '}
                     <Button color="secondary" className="px-3" onClick={() => this.toggle()}>
                         Cancel
@@ -163,5 +165,5 @@ const mapDispatchToProps = dispatch => {
     };
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(ModalAddUser);
+export default connect(mapStateToProps, mapDispatchToProps)(ModalEditUser);
 

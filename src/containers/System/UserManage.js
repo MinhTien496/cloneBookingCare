@@ -2,9 +2,10 @@ import React, { Component } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { connect } from 'react-redux';
 import './UserManage.scss';
-import { getDataUserApi, createNewUserApi, deleteUserApi } from '../../services/userService'
+import { getUsersDataApi, createNewUserApi, editUserDataApi, deleteUserApi } from '../../services/userService'
 //import cái modal từ bên modalAddUser (đỡ phải code, xài của reactstrap)
 import ModalAddUser from './ModalAddUser';
+import ModalEditUser from './ModalEditUser';
 import { emitter } from '../../utils/emitter'
 
 class UserManage extends Component {
@@ -12,20 +13,22 @@ class UserManage extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            arrDataUser: [],
-            isOpenModalAddUser: false
+            arrUserData: [],
+            isOpenModalAddUser: false,
+            isOpenModalEditUser: false,
+            userDataWillBeEdit: {}
         }
     }
 
     async componentDidMount() {
-        await this.getAllDataUsersFromReact();
+        await this.getAllUsersDataFromReact();
     }
 
-    getAllDataUsersFromReact = async () => {
-        let response = await getDataUserApi('ALL');
+    getAllUsersDataFromReact = async () => {
+        let response = await getUsersDataApi('ALL');
         if (response && response.errCode === 0) {
             this.setState({
-                arrDataUser: response.userData
+                arrUserData: response.userData
             })
         }
     }
@@ -36,10 +39,32 @@ class UserManage extends Component {
         })
     }
     // function này tí truyền cho thằng con ModalAddUser.js
-    toggleFromParent = () => {
+    toggleFromParentAddUser = () => {
         this.setState({
             isOpenModalAddUser: !this.state.isOpenModalAddUser
         })
+    }
+
+    toggleFromParentEditUser = () => {
+        this.setState({
+            isOpenModalEditUser: !this.state.isOpenModalEditUser
+        })
+    }
+
+    editUserFromParent = async (data) => {
+        try {
+            let response = await editUserDataApi(data)
+            if(response && response.errCode !== 0) {
+                alert(response.message)
+            } else {
+                await this.getAllUsersDataFromReact();
+                this.setState({
+                    isOpenModalEditUser: false
+                })
+            }
+        } catch(e) {
+            console.log(e)
+        }
     }
 
     addNewUserFromParent = async (data) => {
@@ -48,7 +73,7 @@ class UserManage extends Component {
             if (response && response.errCode !== 0) {
                 alert(response.message)
             } else {
-                await this.getAllDataUsersFromReact();
+                await this.getAllUsersDataFromReact();
                 this.setState({
                     isOpenModalAddUser: false
                 })
@@ -59,13 +84,20 @@ class UserManage extends Component {
         }
     }
 
+    handleEditUser = (userData) => {
+        this.setState({
+            isOpenModalEditUser: true,
+            userDataWillBeEdit: userData
+        })
+    }
+
     handleDeleteUser = async (userData) => {
         try {
             let response = await deleteUserApi(userData.id)
             if (response && response.errCode !== 0) {
                 console.log(response.errMessage)
             } else {
-                await this.getAllDataUsersFromReact();
+                await this.getAllUsersDataFromReact();
             }
         } catch (e) {
             console.log(e)
@@ -79,8 +111,14 @@ class UserManage extends Component {
                 <ModalAddUser
                     //import rồi thì xài ở đây, 2 cái dưới là truyền qua cho thằng con bên ModalAddUser.js
                     isOpen={this.state.isOpenModalAddUser}
-                    toggleFromParent={this.toggleFromParent}
+                    toggleFromParent={this.toggleFromParentAddUser}
                     addNewUserFromParent={this.addNewUserFromParent}
+                />
+                <ModalEditUser
+                    isOpen={this.state.isOpenModalEditUser}
+                    toggleFromParent={this.toggleFromParentEditUser}
+                    userDataWillBeEdit={this.state.userDataWillBeEdit}
+                    editUserFromParent={this.editUserFromParent}
                 />
                 <div className="title text-center">Manage users</div>
                 <div className="mx-1">
@@ -99,8 +137,8 @@ class UserManage extends Component {
                                 <th>Address</th>
                                 <th>Active</th>
                             </tr>
-                            {//check arrDataUser and use map to loop - render
-                                this.state.arrDataUser && this.state.arrDataUser.map((item, index) => {
+                            {//check arrUserData and use map to loop - render
+                                this.state.arrUserData && this.state.arrUserData.map((item, index) => {
                                     return (
                                         <tr key={index}>
                                             <td>{item.email}</td>
@@ -108,7 +146,7 @@ class UserManage extends Component {
                                             <td>{item.lastName}</td>
                                             <td>{item.address}</td>
                                             <td className="active-User">
-                                                <button>
+                                                <button onClick={() => this.handleEditUser(item)}>
                                                     <i className="fas fa-user-edit"></i>
                                                 </button>
                                                 <button onClick={() => this.handleDeleteUser(item)}>
