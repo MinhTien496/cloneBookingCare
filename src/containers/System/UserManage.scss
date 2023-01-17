@@ -33,14 +33,19 @@
 .active-User {
   width: 100px;
 
-  i {
-    cursor: pointer;
-    margin: 0 12px;
-    color: rgb(101, 101, 101);
-  }
+  button {
+    outline: none;
+    border: none;
+    background-color: #ffffff00;
 
-  i:hover {
-    color: rgb(33, 33, 33)
+    i {
+      padding: 0 6px;
+      color: rgb(101, 101, 101);
+    }
+
+    i:hover {
+      color: rgb(33, 33, 33)
+    }
   }
 }
 

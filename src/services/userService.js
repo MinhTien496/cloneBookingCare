@@ -17,8 +17,17 @@ const createNewUserApi = (inputData) => {
     return axios.post('/api/create-new-user', inputData)
 }
 
+const deleteUserApi = (inputId) => {
+    return axios.delete('/api/delete-user', {
+        data: {
+            id: inputId
+        }
+    })
+}
+
 export {
     handleLoginApi,
     getDataUserApi,
-    createNewUserApi
+    createNewUserApi,
+    deleteUserApi
 }

@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { connect } from 'react-redux';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import { emitter } from '../../utils/emitter'
+
 class ProductManage extends Component {
     //Khai báo constructor có thằng props - thằng này có data từ th cha (UserManage.js)
     //tao state luon de luu data
@@ -14,6 +16,20 @@ class ProductManage extends Component {
             lastName: "",
             address: ""
         }
+
+        this.listenToEmitter();
+    }
+
+    listenToEmitter() {
+        emitter.on('EVENT_CLEAR_INPUT_PARAMETER_MODAL_ADD_NEW_USER', () => {
+            this.setState({
+                email: "",
+                password: "",
+                firstName: "",
+                lastName: "",
+                address: ""  
+            })
+        })
     }
 
     componentDidMount() {
@@ -36,14 +52,14 @@ class ProductManage extends Component {
             ...newCopyState
         })
     }
-    
+
     validateInputData = () => {
         let isValidate = true;
-        let arrInputData = ['email','password','firstName','lastName','address'];
+        let arrInputData = ['email', 'password', 'firstName', 'lastName', 'address'];
         let arrInputNull = [];
         let lengthArrInputData = arrInputData.length
-        for(let i = 0; i < lengthArrInputData; i++) {
-            if(!this.state[arrInputData[i]]) {
+        for (let i = 0; i < lengthArrInputData; i++) {
+            if (!this.state[arrInputData[i]]) {
                 isValidate = false;
                 arrInputNull.push(arrInputData[i])
                 alert('Missing input parameter!')
@@ -53,11 +69,11 @@ class ProductManage extends Component {
         return isValidate
     }
 
-    
+
 
     handleAddNewUser = () => {
         let checkValidate = this.validateInputData()
-        if(checkValidate === true) {
+        if (checkValidate === true) {
             this.props.addNewUserFromParent(this.state)
         }
     }

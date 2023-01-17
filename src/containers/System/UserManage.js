@@ -2,9 +2,10 @@ import React, { Component } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { connect } from 'react-redux';
 import './UserManage.scss';
-import { getDataUserApi, createNewUserApi } from '../../services/userService'
+import { getDataUserApi, createNewUserApi, deleteUserApi } from '../../services/userService'
 //import cái modal từ bên modalAddUser (đỡ phải code, xài của reactstrap)
 import ModalAddUser from './ModalAddUser';
+import { emitter } from '../../utils/emitter'
 
 class UserManage extends Component {
 
@@ -44,15 +45,29 @@ class UserManage extends Component {
     addNewUserFromParent = async (data) => {
         try {
             let response = await createNewUserApi(data)
-            if(response && response.errCode !== 0) {
+            if (response && response.errCode !== 0) {
                 alert(response.message)
             } else {
                 await this.getAllDataUsersFromReact();
                 this.setState({
                     isOpenModalAddUser: false
                 })
+                emitter.emit('EVENT_CLEAR_INPUT_PARAMETER_MODAL_ADD_NEW_USER')
             }
-        } catch(e) {
+        } catch (e) {
+            console.log(e)
+        }
+    }
+
+    handleDeleteUser = async (userData) => {
+        try {
+            let response = await deleteUserApi(userData.id)
+            if (response && response.errCode !== 0) {
+                console.log(response.errMessage)
+            } else {
+                await this.getAllDataUsersFromReact();
+            }
+        } catch (e) {
             console.log(e)
         }
     }
@@ -93,8 +108,12 @@ class UserManage extends Component {
                                             <td>{item.lastName}</td>
                                             <td>{item.address}</td>
                                             <td className="active-User">
-                                                <i className="fas fa-user-edit"></i>
-                                                <i className="fas fa-user-times"></i>
+                                                <button>
+                                                    <i className="fas fa-user-edit"></i>
+                                                </button>
+                                                <button onClick={() => this.handleDeleteUser(item)}>
+                                                    <i className="fas fa-user-times"></i>
+                                                </button>
                                             </td>
                                         </tr>
                                     )
