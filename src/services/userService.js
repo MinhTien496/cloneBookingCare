@@ -8,8 +8,17 @@ const handleLoginApi = (userEmailInput, userPasswordInput) => {
     });
 }
 
-const getDataUser = (inputId) => {
+//inputId == 'ALL' -> API return all data user
+const getDataUserApi = (inputId) => {
     return axios.get(`/api/get-all-users?id=${inputId}`);
 }
 
-export { handleLoginApi, getDataUser }
+const createNewUserApi = (inputData) => {
+    return axios.post('/api/create-new-user', inputData)
+}
+
+export {
+    handleLoginApi,
+    getDataUserApi,
+    createNewUserApi
+}

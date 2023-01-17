@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { connect } from 'react-redux';
 import './UserManage.scss';
-import { getDataUser } from '../../services/userService'
+import { getDataUserApi, createNewUserApi } from '../../services/userService'
+//import cái modal từ bên modalAddUser (đỡ phải code, xài của reactstrap)
 import ModalAddUser from './ModalAddUser';
 
 class UserManage extends Component {
@@ -11,31 +12,49 @@ class UserManage extends Component {
         super(props);
         this.state = {
             arrDataUser: [],
-            isModalOpen: false
+            isOpenModalAddUser: false
         }
     }
 
     async componentDidMount() {
-        let response = await getDataUser('ALL');
+        await this.getAllDataUsersFromReact();
+    }
+
+    getAllDataUsersFromReact = async () => {
+        let response = await getDataUserApi('ALL');
         if (response && response.errCode === 0) {
             this.setState({
                 arrDataUser: response.userData
-            }, () => {
-                console.log('arrData', response.userData)
             })
         }
     }
 
     handleAddNewUser = () => {
         this.setState({
-            isModalOpen: true
+            isOpenModalAddUser: true
+        })
+    }
+    // function này tí truyền cho thằng con ModalAddUser.js
+    toggleFromParent = () => {
+        this.setState({
+            isOpenModalAddUser: !this.state.isOpenModalAddUser
         })
     }
 
-    toggleFromParent = () => {
-        this.setState({
-            isModalOpen: !this.state.isModalOpen
-        })
+    addNewUserFromParent = async (data) => {
+        try {
+            let response = await createNewUserApi(data)
+            if(response && response.errCode !== 0) {
+                alert(response.message)
+            } else {
+                await this.getAllDataUsersFromReact();
+                this.setState({
+                    isOpenModalAddUser: false
+                })
+            }
+        } catch(e) {
+            console.log(e)
+        }
     }
 
 
@@ -43,41 +62,45 @@ class UserManage extends Component {
         return (
             <div className="users-container">
                 <ModalAddUser
-                    isOpen = {this.state.isModalOpen}
-                    toggleFromParent = {this.toggleFromParent}
+                    //import rồi thì xài ở đây, 2 cái dưới là truyền qua cho thằng con bên ModalAddUser.js
+                    isOpen={this.state.isOpenModalAddUser}
+                    toggleFromParent={this.toggleFromParent}
+                    addNewUserFromParent={this.addNewUserFromParent}
                 />
                 <div className="title text-center">Manage users</div>
                 <div className="mx-1">
                     <button className="btn btn-primary px-3 mx-1" onClick={() => this.handleAddNewUser()}>
                         Add user
-                        <i class="fas fa-user-plus mx-2"></i>
+                        <i className="fas fa-user-plus mx-2"></i>
                     </button>
                 </div>
                 <div className="table-data mt-3 mx-2">
                     <table id="customers">
-                        <tr>
-                            <th>Email</th>
-                            <th>First name</th>
-                            <th>Last name</th>
-                            <th>Address</th>
-                            <th>Active</th>
-                        </tr>
-                        {//check arrDataUser and use map to loop - render
-                            this.state.arrDataUser && this.state.arrDataUser.map((item, index) => {
-                                return (
-                                    <tr key={index}>
-                                        <td>{item.email}</td>
-                                        <td>{item.firstName}</td>
-                                        <td>{item.lastName}</td>
-                                        <td>{item.address}</td>
-                                        <td className="active-User">
-                                            <i class="fas fa-user-edit"></i>
-                                            <i class="fas fa-user-times"></i>
-                                        </td>
-                                    </tr>
-                                )
-                            })
-                        }
+                        <tbody>
+                            <tr>
+                                <th>Email</th>
+                                <th>First name</th>
+                                <th>Last name</th>
+                                <th>Address</th>
+                                <th>Active</th>
+                            </tr>
+                            {//check arrDataUser and use map to loop - render
+                                this.state.arrDataUser && this.state.arrDataUser.map((item, index) => {
+                                    return (
+                                        <tr key={index}>
+                                            <td>{item.email}</td>
+                                            <td>{item.firstName}</td>
+                                            <td>{item.lastName}</td>
+                                            <td>{item.address}</td>
+                                            <td className="active-User">
+                                                <i className="fas fa-user-edit"></i>
+                                                <i className="fas fa-user-times"></i>
+                                            </td>
+                                        </tr>
+                                    )
+                                })
+                            }
+                        </tbody>
                     </table>
                 </div>
             </div>

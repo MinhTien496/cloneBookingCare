@@ -81,7 +81,7 @@ class Login extends Component {
                             <label>Password</label>
                             <input type={this.state.isShowPassword ? 'text' : 'password'} className='form-control' value={this.state.password} onChange={(event) => this.handleOnChangePassword(event)}></input>
                             <span onClick={() => {this.handleShowPassword()}}>
-                                <i class={this.state.isShowPassword ? 'fas fa-eye-slash' : 'fas fa-eye'}></i>
+                                <i className={this.state.isShowPassword ? 'fas fa-eye-slash' : 'fas fa-eye'}></i>
                             </span>
                         </div>
                         <div className='errorMessage'>
@@ -97,9 +97,9 @@ class Login extends Component {
                             <span>Other login:</span>
                         </div>
                         <div className='iconOtherLogin'>
-                            <i class="fab fa-google"></i>
-                            <i class="fab fa-facebook"></i>
-                            <i class="fab fa-twitter"></i>
+                            <i className="fab fa-google"></i>
+                            <i className="fab fa-facebook"></i>
+                            <i className="fab fa-twitter"></i>
                         </div>
                     </div>
                 </div>
